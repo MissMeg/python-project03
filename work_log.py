@@ -142,54 +142,55 @@ def edit_task(task):
         clear()
         print('Current Date:', task.task_date)
         new_task_date = input('(Please use YYYY/MM/DD) Change date of the task or press Enter to keep the same > ')
-        if new_task_date == '':
-            new_task_date = task.task_date
-        else:
-            # make sure the user enters a valid date
-            try:
-                new_task_date = datetime.strptime(new_task_date, date_format)
-            except ValueError:
-                input('That\'s not a valid date. Please press enter to try again.')
-        while True:
-            clear()
-            print('Current Title:', task.task_title)
-            new_title = input('Change the title of the task or press Enter to keep the same > ')
-            if new_title == '':
-                new_title = task.task_title
-            # make sure the user enters a title
-            try:
-                if not new_title:
-                    raise ValueError('Please input a title')
-            except ValueError as error:
-                print(error)
+        # make sure the user enters a valid date
+        try:
+            if new_task_date == '':
+                new_task_date = task.task_date
             else:
+                new_task_date = datetime.strptime(new_task_date, date_format)
+        except ValueError:
+            input('That\'s not a valid date. Please press enter to try again.')
+        else:
+            while True:
                 clear()
-                # Start another while loop so if a mistake is made
-                # so the user doesn't get sent back to the main menu
-                while True:
-                    print('Current Time Spent:', task.task_time_spent)
-                    new_time_spent = input('Change time Spent (rounded minutes) or press Enter to keep the same > ')
-                    if new_time_spent == '':
-                        new_time_spent = task.task_time_spent
-                    # make sure the user enters time_spent with numbers
-                    try:
-                        int(new_time_spent)
-                    except ValueError:
-                        input('Please enter the time in minutes using numbers. Press enter to '
-                              'try again')
-                    else:
-                        clear()
-                        print('Current Notes:', task.task_notes)
-                        new_notes = input('Change notes or press Enter to keep the same > ')
-                        if not new_notes:
-                            log.add_task(Task(new_task_date, new_title, new_time_spent))
+                print('Current Title:', task.task_title)
+                new_title = input('Change the title of the task or press Enter to keep the same > ')
+                if new_title == '':
+                    new_title = task.task_title
+                # make sure the user enters a title
+                try:
+                    if not new_title:
+                        raise ValueError('Please input a title')
+                except ValueError as error:
+                    print(error)
+                else:
+                    clear()
+                    # Start another while loop so if a mistake is made
+                    # so the user doesn't get sent back to the main menu
+                    while True:
+                        print('Current Time Spent:', task.task_time_spent)
+                        new_time_spent = input('Change time Spent (rounded minutes) or press Enter to keep the same > ')
+                        if new_time_spent == '':
+                            new_time_spent = task.task_time_spent
+                        # make sure the user enters time_spent with numbers
+                        try:
+                            int(new_time_spent)
+                        except ValueError:
+                            input('Please enter the time in minutes using numbers. Press enter to '
+                                  'try again')
                         else:
-                            log.add_task(Task(new_task_date, new_title, new_time_spent, new_notes))
-                        input('The task has been added! Press Enter to return to the main menu')
-                        # break out of all loops to go back to the main menu
-                        break
-                break
-        break
+                            clear()
+                            print('Current Notes:', task.task_notes)
+                            new_notes = input('Change notes or press Enter to keep the same > ')
+                            if not new_notes:
+                                log.add_task(Task(new_task_date, new_title, new_time_spent))
+                            else:
+                                log.add_task(Task(new_task_date, new_title, new_time_spent, new_notes))
+                            input('The task has been added! Press Enter to return to the main menu')
+                            # break out of all loops to go back to the main menu
+                            break
+                    break
+            break
 
 
 def matches(task_matches):
