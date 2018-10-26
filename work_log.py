@@ -203,44 +203,93 @@ def matches(task_matches):
     end_page = len(task_matches)
     request = ''
 
+    # setup for checking on paging status
+    next = False
+    prev = False
+
     # print correct result string based off of result length
     if len(task_matches) == 1:
         request = input(single_result_string.format(current_page, end_page)).upper()
     elif len(task_matches) != 1:
         request = input(multiple_result_string_next.format(current_page,
                                                            end_page)).upper()
+        next = True
 
     # loop through to change pages, as well as, to edit or delete tasks + return to menu
     while True:
         # next page
         if request == 'N':
-            current_page += 1
-            match_to_print += 1
-            next_match_to_print = task_matches[match_to_print]
-            print(next_match_to_print)
-            if current_page == end_page:
-                request = input(multiple_result_string_prev.format(
-                    current_page,
-                    end_page)).upper()
+            if next:
+                current_page += 1
+                match_to_print += 1
+                next_match_to_print = task_matches[match_to_print]
+                print(next_match_to_print)
+                if current_page == end_page:
+                    request = input(multiple_result_string_prev.format(
+                                    current_page,
+                                    end_page)).upper()
+                    next = False
+                    prev = True
+                else:
+                    request = input(multiple_result_string_both.format(
+                                    current_page,
+                                    end_page)).upper()
+                    next = True
+                    prev = True
             else:
-                request = input(multiple_result_string_both.format(
-                    current_page,
-                    end_page)).upper()
+                clear()
+                print('Next is not an option.')
+                next_match_to_print = task_matches[match_to_print]
+                print(next_match_to_print)
+                if current_page == end_page:
+                    request = input(multiple_result_string_prev.format(
+                                    current_page,
+                                    end_page)).upper()
+                    next = False
+                    prev = True
+                else:
+                    request = input(multiple_result_string_both.format(
+                                    current_page,
+                                    end_page)).upper()
+                    next = True
+                    prev = True
 
         # previous page
         elif request == 'P':
-            current_page -= 1
-            match_to_print -= 1
-            next_match_to_print = task_matches[match_to_print]
-            print(next_match_to_print)
-            if current_page == 1:
-                request = input(
-                    multiple_result_string_next.format(current_page,
-                                                       end_page)).upper()
+            if prev:
+                current_page -= 1
+                match_to_print -= 1
+                next_match_to_print = task_matches[match_to_print]
+                print(next_match_to_print)
+                if current_page == 1:
+                    request = input(
+                        multiple_result_string_next.format(current_page,
+                                                           end_page)).upper()
+                    next = True
+                    prev = False
+                else:
+                    request = input(
+                        multiple_result_string_both.format(current_page,
+                                                           end_page)).upper()
+                    next = True
+                    prev = True
             else:
-                request = input(
-                    multiple_result_string_both.format(current_page,
-                                                       end_page)).upper()
+                clear()
+                print('Prev is not an option.')
+                next_match_to_print = task_matches[match_to_print]
+                print(next_match_to_print)
+                if current_page == 1:
+                    request = input(
+                        multiple_result_string_next.format(current_page,
+                                                           end_page)).upper()
+                    next = True
+                    prev = False
+                else:
+                    request = input(
+                        multiple_result_string_both.format(current_page,
+                                                           end_page)).upper()
+                    next = True
+                    prev = True
 
         # call edit page
         elif request == 'E':
@@ -261,16 +310,27 @@ def matches(task_matches):
 
 
 if __name__ == "__main__":
-    os.makedirs(os.path.dirname('output/tasks.csv'), exist_ok=True)
-    with open('output/tasks.csv', 'a') as tasksfile:
-        writer = csv.DictWriter(tasksfile, fieldnames=['Date', 'Title', 'Time Spent', 'Notes'])
-        writer.writeheader()
-
     # Start the log
     log = WorkLog()
 
+    # check if file already exists
+    if not os.path.isfile('output/tasks.csv'):
+        os.makedirs(os.path.dirname('output/tasks.csv'))
+        with open('output/tasks.csv', 'a') as tasksfile:
+            writer = csv.DictWriter(tasksfile, fieldnames=['Date', 'Title', 'Time Spent', 'Notes'])
+            writer.writeheader()
+    else:
+        with open('output/tasks.csv', 'r') as csv_file:
+            reading = csv.reader(csv_file)
+            count = 0
+            for row in reading:
+                if count > 0:
+                    print(row)
+                    log.add_task(Task(row[0], row[1], row[2], row[3]))
+                count += 1
+
     while True:
-        clear()
+#        clear()
         # Print Initial Menu
         first_response = input('''\
             \nWork Log Menu\
@@ -379,10 +439,10 @@ if __name__ == "__main__":
                                 else:
                                     pattern_matches = []
                                     for task in log.log:
-                                        if re.search(search_pattern, task.task_title) \
-                                                or re.search(search_pattern, task.task_time_spent) \
-                                                or re.search(search_pattern, task.task_date) \
-                                                or re.search(search_pattern, task.task_notes):
+                                        if re.search(search_pattern, str(task.task_title)) \
+                                                or re.search(search_pattern, str(task.task_time_spent)) \
+                                                or re.search(search_pattern, str(task.task_date)) \
+                                                or re.search(search_pattern, str(task.task_notes)):
                                             pattern_matches.append(task)
                                     if len(pattern_matches) < 1:
                                         input('No matches. Please try again.')
